@@ -136,7 +136,7 @@ export default function Home() {
                   if (message.type === 'apiMessage') {
                     icon = (
                       <Image
-                        key={index}
+                        key={`${index}-api`}
                         src="/bot-image.png"
                         alt="AI"
                         width="40"
@@ -149,7 +149,7 @@ export default function Home() {
                   } else {
                     icon = (
                       <Image
-                        key={index}
+                        key={`${index}-notapi`}
                         src="/usericon.png"
                         alt="Me"
                         width="30"
@@ -262,7 +262,8 @@ export default function Home() {
         </div>
         <footer className="m-auto p-4">
           <a href="https://twitter.com/mayowaoshin">
-            Powered by LangChainAI. Demo built by Mayo (Twitter: @mayowaoshin).
+            Powered by LangChainAI and Chroma. Demo built by Mayo (Twitter:
+            @mayowaoshin).
           </a>
         </footer>
       </Layout>
