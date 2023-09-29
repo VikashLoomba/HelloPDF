@@ -6,6 +6,11 @@ module.exports = {
     './components/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+        minWidth: theme => ({
+          11: theme('spacing[11]'),
+          64: theme('spacing[64]')
+        })
+    },
   },
 };

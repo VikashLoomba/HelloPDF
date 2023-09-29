@@ -9,7 +9,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const { question, history } = req.body;
+  const { question, history, collectionName } = req.body;
 
   console.log('question', question);
   console.log('history', history);
@@ -31,7 +31,7 @@ export default async function handler(
     const vectorStore = await Chroma.fromExistingCollection(
       new OpenAIEmbeddings({}),
       {
-        collectionName: COLLECTION_NAME,
+        collectionName: collectionName ?? COLLECTION_NAME,
       },
     );
 

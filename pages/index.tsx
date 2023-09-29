@@ -12,6 +12,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import FileUploadComponent from './components/FileUploadComponent';
 
 export default function Home() {
   const [query, setQuery] = useState<string>('');
@@ -31,6 +32,7 @@ export default function Home() {
     ],
     history: [],
   });
+  const [collectionName, setCollectionName] = useState<string | null>(null);
 
   const { messages, history } = messageState;
 
@@ -77,6 +79,7 @@ export default function Home() {
         body: JSON.stringify({
           question,
           history,
+          collectionName
         }),
       });
       const data = await response.json();
@@ -127,7 +130,8 @@ export default function Home() {
           <h1 className="text-2xl font-bold leading-[1.1] tracking-tighter text-center">
             Chat With Your Docs
           </h1>
-          <main className={styles.main}>
+          <main className={`${styles.main} space-y-2`}>
+            <FileUploadComponent setCollectionName={setCollectionName} />
             <div className={styles.cloud}>
               <div ref={messageListRef} className={styles.messagelist}>
                 {messages.map((message, index) => {
