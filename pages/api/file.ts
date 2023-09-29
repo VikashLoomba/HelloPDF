@@ -18,7 +18,7 @@ export async function handler(
     console.log('Fields: ', fields);
     
     try {
-        const newFilename = Object.keys(files).map((key) => files[key]?.[0]?.newFilename)[0];
+        const newFilename = files.files?.[0]?.newFilename;
         const docs = await loadDocumentsFromPDF(files);
         // generate embeddings from docs
         const generatedEmbeddings = await generateEmbeddings(docs, newFilename ?? 'defaultCollection');

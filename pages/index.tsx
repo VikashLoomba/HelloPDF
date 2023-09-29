@@ -131,7 +131,7 @@ export default function Home() {
             Chat With Your Docs
           </h1>
           <main className={`${styles.main} space-y-2`}>
-            <FileUploadComponent setCollectionName={setCollectionName} />
+            <FileUploadComponent setCollectionName={setCollectionName} collectionName={collectionName}/>
             <div className={styles.cloud}>
               <div ref={messageListRef} className={styles.messagelist}>
                 {messages.map((message, index) => {

@@ -19,13 +19,13 @@ export const generateEmbeddings = async (docs: Document<Record<string, any>>[], 
   }
 }
 
-type WithFile = Required<formidable.File[]>
+type WithFile = Required<formidable.File>
 export const loadDocumentsFromPDF = async (files: formidable.Files) => {
   try {
     console.log('Files passed to loadDocuments: ', files);
     /*load raw docs from the all files in the directory */
     const rawDocs: Document[] = []
-    const pdfLoaders = Object.values(files).filter((pdfBlob): pdfBlob is WithFile => !!pdfBlob).map((pdfBlob) => new PDFLoader(pdfBlob[0].filepath));
+    const pdfLoaders = files.files?.filter((fileArray): fileArray is WithFile => !!fileArray).map((file) => new PDFLoader(file.filepath)) ?? [];
     for await (const loader of pdfLoaders) {
       const doc = await loader.load();
       rawDocs.push(...doc);

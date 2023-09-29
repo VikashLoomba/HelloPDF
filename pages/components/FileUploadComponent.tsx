@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { fileOpen } from 'browser-fs-access';
 import type { FileWithHandle } from 'browser-fs-access'
 
-function FileUploadComponent(props: { setCollectionName: (collectionName: string) => void }) {
+function FileUploadComponent(props: { setCollectionName: (collectionName: string | null) => void, collectionName: string | null }) {
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState<FileWithHandle[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -60,13 +60,22 @@ function FileUploadComponent(props: { setCollectionName: (collectionName: string
         body: postData,
       });
       const name = await res.json();
-      props.setCollectionName(name);
+      if(!props.collectionName) {
+        props.setCollectionName(name);
+      }
+      
     } catch (error) {
       console.error('Error submitting files:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  const resetFileState = () => {
+    props.setCollectionName(null);
+    setFiles([]);
+
+  }
 
   return (
     <div className="flex flex-col min-w-64 items-center justify-center bg-grey-lighter">
@@ -109,7 +118,7 @@ function FileUploadComponent(props: { setCollectionName: (collectionName: string
         </button><button
           type='button'
           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 active:bg-blue-700 focus:outline-none"
-          onClick={() => setFiles([])}
+          onClick={resetFileState}
           disabled={loading}
         >Clear Documents</button></>
       )}
