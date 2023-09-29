@@ -1,11 +1,6 @@
 import { generateEmbeddings, loadDocumentsFromPDF } from "@/scripts/ingest-data";
 import { handleFile } from "../../utils/handleFile";
-import { PDFLoader } from "langchain/document_loaders/fs/pdf";
-
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { NextApiRequest, NextApiResponse, PageConfig } from "next";
-import { NextRequest } from "next/server";
-import formidable from 'formidable';
 
 export async function handler(
     req: NextApiRequest,
