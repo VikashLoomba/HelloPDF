@@ -15,7 +15,6 @@ export async function handler(
 
     const { files, fields } = await handleFile(req)
     console.log('Files: ', files);
-    console.log('Fields: ', fields);
     
     try {
         const newFilename = files.files?.[0]?.newFilename;
