@@ -56,20 +56,9 @@ export default function Home() {
 
     const question = query.trim();
 
-    setMessageState((state) => ({
-      ...state,
-      messages: [
-        ...state.messages,
-        {
-          type: 'userMessage',
-          message: question,
-        },
-      ],
-    }));
-
     setLoading(true);
     setQuery('');
-
+    const userQuestion: Message = { type: 'userMessage', message: question };
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -82,34 +71,44 @@ export default function Home() {
           collectionName
         }),
       });
-      const data = await response.json();
-      console.log('data', data);
+      const stream = response.body;
+      const reader = stream?.getReader();
+      
+      
+      let newMessageString = '';
+      try {
+        while (true && reader) {
+          const { done, value } = await reader.read();
+          if (done) {
+            console.log('final value: ', new TextDecoder().decode(value))
+            break;
+          }
+          const data = new TextDecoder().decode(value);
+          newMessageString += data
 
-      if (data.error) {
-        setError(data.error);
-      } else {
-        setMessageState((state) => ({
-          ...state,
-          messages: [
-            ...state.messages,
-            {
-              type: 'apiMessage',
-              message: data.text,
-              sourceDocs: data.sourceDocuments,
-            },
-          ],
-          history: [...state.history, [question, data.text]],
-        }));
+          const newMessage: Message = { type: 'apiMessage', message: newMessageString }
+          const newMessageList = [...messages, {...userQuestion}, newMessage];
+          
+          setMessageState((state) => ({
+            ...state, messages: [...newMessageList]
+          }));
+
+          //scroll to bottom
+          if(messageListRef.current) {
+            messageListRef.current.scrollTop = messageListRef.current.scrollHeight
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        reader?.releaseLock();
+        setMessageState((state) => ({ ...state, history: [...history, [question, newMessageString]] }));
+
       }
-      console.log('messageState', messageState);
-
       setLoading(false);
-
-      //scroll to bottom
-      messageListRef.current?.scrollTo(0, messageListRef.current.scrollHeight);
     } catch (error) {
       setLoading(false);
-      setError('An error occurred while fetching the data. Please try again.');
+      setError('An error occurred while fetching the data. Please try again.' + error);
       console.log('error', error);
     }
   }
@@ -131,9 +130,9 @@ export default function Home() {
             Chat With Your Docs
           </h1>
           <main className={`${styles.main} space-y-2`}>
-            <FileUploadComponent setCollectionName={setCollectionName} collectionName={collectionName}/>
+            <FileUploadComponent setCollectionName={setCollectionName} collectionName={collectionName} />
             <div className={styles.cloud}>
-              <div ref={messageListRef} className={styles.messagelist}>
+              <div className={styles.messagelist} ref={messageListRef}>
                 {messages.map((message, index) => {
                   let icon;
                   let className;

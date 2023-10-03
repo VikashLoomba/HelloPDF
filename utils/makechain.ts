@@ -1,7 +1,7 @@
 import { ConversationalRetrievalQAChain } from 'langchain/chains';
 import { Chroma } from 'langchain/vectorstores/chroma';
 import { OpenAI } from "langchain/llms/openai";
-
+import { CallbackManager } from "langchain/callbacks";
 const CONDENSE_TEMPLATE = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
 
 Chat History:
@@ -18,10 +18,16 @@ If the question is not related to the context, politely respond that you are tun
 Question: {question}
 Helpful answer in markdown:`;
 
-export const makeChain = (vectorstore: Chroma) => {
+export const makeChain = (vectorstore: Chroma, streamHandler:any) => {
   const model = new OpenAI({
     temperature: 0.1, // increase temepreature to get more creative answers
     modelName: 'gpt-4', //change this to gpt-4 if you have access
+    streaming: true,
+    callbackManager: CallbackManager.fromHandlers({
+      async handleLLMNewToken(token) {
+        streamHandler(token);
+      },
+    }),
   });
 
   const chain = ConversationalRetrievalQAChain.fromLLM(

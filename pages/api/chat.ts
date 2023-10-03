@@ -29,7 +29,7 @@ export default async function handler(
 
   try {
     /* create vectorstore*/
-    const client = new ChromaClient({ path: `http://${process.env.CHROMA_URL}`, auth: {provider: 'token', credentials: process.env.CHROMA_AUTH_TOKEN}});
+    const client = new ChromaClient({ path: `http://${process.env.CHROMA_URL}`, auth: { provider: 'token', credentials: process.env.CHROMA_AUTH_TOKEN } });
     const vectorStore = await Chroma.fromExistingCollection(
       new OpenAIEmbeddings({}),
       {
@@ -40,7 +40,11 @@ export default async function handler(
     );
 
     //create chain
-    const chain = makeChain(vectorStore);
+
+    function handleNewToken(token: any) {
+      res.write(`${token}`);
+    }
+    const chain = makeChain(vectorStore, handleNewToken);
 
     const pastMessages = history.map((message: string, i: number) => {
       if (i % 2 === 0) {
@@ -57,7 +61,7 @@ export default async function handler(
     });
 
     console.log('response', response);
-    res.status(200).json(response);
+    res.end();
   } catch (error: any) {
     console.log('error', error);
     res.status(500).json({ error: error.message || 'Something went wrong' });
