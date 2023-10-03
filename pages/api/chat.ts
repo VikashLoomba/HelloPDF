@@ -4,6 +4,7 @@ import { AIMessage, HumanMessage } from 'langchain/schema';
 import { makeChain } from '@/utils/makechain';
 import { COLLECTION_NAME } from '@/config/chroma';
 import { Chroma } from 'langchain/vectorstores/chroma';
+import { ChromaClient } from 'chromadb';
 
 export default async function handler(
   req: NextApiRequest,
@@ -28,9 +29,12 @@ export default async function handler(
 
   try {
     /* create vectorstore*/
+    const client = new ChromaClient({ path: `http://${process.env.CHROMA_URL}`, auth: {provider: 'token', credentials: process.env.CHROMA_AUTH_TOKEN}});
     const vectorStore = await Chroma.fromExistingCollection(
       new OpenAIEmbeddings({}),
       {
+        url: `http://${btoa(process.env.CHROMA_AUTH_BASIC ?? '')}:${process.env.CHROMA_URL}`,
+        index: client,
         collectionName: collectionName ?? COLLECTION_NAME,
       },
     );

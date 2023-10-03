@@ -2,6 +2,7 @@ import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf'
 import { Chroma } from 'langchain/vectorstores/chroma';
+import { ChromaClient, } from 'chromadb';
 import type { Document } from 'langchain/document';
 import formidable from 'formidable';
 
@@ -9,9 +10,12 @@ export const generateEmbeddings = async (docs: Document<Record<string, any>>[], 
   try {
     /*create and store the embeddings in the vectorStore*/
     const embeddings = new OpenAIEmbeddings();
-
+    // console.log('Chrome URL: ', `http://${btoa(process.env.CHROMA_AUTH_BASIC ?? '')}:${process.env.CHROMA_URL}`);
+    const client = new ChromaClient({ path: `http://${process.env.CHROMA_URL}`, auth: {provider: 'token', credentials: process.env.CHROMA_AUTH_TOKEN}});
     return await Chroma.fromDocuments(docs, embeddings, {
+      url: `http://${btoa(process.env.CHROMA_AUTH_BASIC ?? '')}:${process.env.CHROMA_URL}`,
       collectionName: filename,
+      index: client,
     });
   } catch (error) {
     console.log('error', error);
