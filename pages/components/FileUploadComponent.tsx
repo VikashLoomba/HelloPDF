@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { fileOpen } from 'browser-fs-access';
 import type { FileWithHandle } from 'browser-fs-access'
 
-function FileUploadComponent(props: { setCollectionName: (collectionName: string | null) => void, collectionName: string | null }) {
+function FileUploadComponent(props: { setCollectionName: (collectionName: string | null) => void, collectionName: string | null, files: FileWithHandle[], setFiles: (files: FileWithHandle[]) => void, handleSubmitFiles: () => void }) {
   const [isDragging, setIsDragging] = useState(false);
-  const [files, setFiles] = useState<FileWithHandle[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleFileOpen = async () => {
@@ -16,7 +15,7 @@ function FileUploadComponent(props: { setCollectionName: (collectionName: string
       });
       // Handle the uploaded files here
       console.log(addedFiles);
-      setFiles([...addedFiles, ...files])
+      props.setFiles([...addedFiles, ...props.files])
     } catch (error) {
       console.error('Error opening files:', error);
     }
@@ -43,37 +42,15 @@ function FileUploadComponent(props: { setCollectionName: (collectionName: string
     if (droppedFiles.length > 0) {
       // Handle the dropped files here
       console.log(droppedFiles);
-      setFiles([...droppedFiles, ...files])
+      props.setFiles([...droppedFiles, ...props.files])
     }
   };
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    const postData = new FormData();
-    files.forEach((file) => {
-      postData.append('files', file);
-    });
-    if(props.collectionName) postData.append('collectionName', props.collectionName);
-    try {
-      const res = await fetch('/api/file', {
-        method: 'POST',
-        body: postData,
-      });
-      const name = await res.json();
-      if(!props.collectionName) {
-        props.setCollectionName(name);
-      }
-      
-    } catch (error) {
-      console.error('Error submitting files:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  
 
   const resetFileState = () => {
     props.setCollectionName(null);
-    setFiles([]);
+    props.setFiles([]);
 
   }
 
@@ -94,17 +71,17 @@ function FileUploadComponent(props: { setCollectionName: (collectionName: string
           </>
       </label>
       <>
-      {files.length > 0 && <ul>
-            {files.map((file, index) => (
+      {props.files.length > 0 && <ul>
+            {props.files.map((file, index) => (
               <li key={index} className="text-sm py-1">{file.name}</li>
             ))}
           </ul>}
       </>
-      {files.length > 0 && (
+      {props.files.length > 0 && (
         <><button
           type='button'
           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 active:bg-blue-700 focus:outline-none"
-          onClick={handleSubmit}
+          onClick={props.handleSubmitFiles}
           disabled={loading}
         >
           {loading ? <>

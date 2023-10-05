@@ -14,11 +14,16 @@ import {
 import FileUploadComponent from './components/FileUploadComponent';
 import { useChat } from 'ai/react';
 
+import type { FileWithHandle } from 'browser-fs-access'
+
 export default function Home() {
   const messageListRef = useRef<HTMLDivElement>(null);
   const [sourcesForMessages, setSourcesForMessages] = useState<Record<string, any>>({});
   const [collectionName, setCollectionName] = useState<string | null>(null);
-  const { messages, input, handleInputChange, handleSubmit, data, isLoading, error } = useChat({
+  const [files, setFiles] = useState<FileWithHandle[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [fileError, setFileError] = useState<Error | null>(null);
+  const { messages, input, handleInputChange, handleSubmit, data, isLoading, error, } = useChat({
     api: '/api/chat', body: { collectionName }, headers: { 'Content-Type': 'application/json' },
     onResponse(response) {
       const sourcesHeader = response.headers.get("x-sources");
@@ -46,6 +51,32 @@ export default function Home() {
     }
   };
 
+  const handleSubmitFiles = async () => {
+    setLoading(true);
+    const postData = new FormData();
+    files.forEach((file) => {
+      postData.append('files', file);
+    });
+    if(collectionName) {postData.append('collectionName', collectionName);}
+    try {
+      const res = await fetch('/api/file', {
+        method: 'POST',
+        body: postData,
+      });
+      const name = await res.json();
+      if(!collectionName) {
+        setCollectionName(name);
+      }
+      setFileError(null);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error submitting files:', error);
+      setFileError(error as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <Layout>
@@ -54,7 +85,7 @@ export default function Home() {
             Chat With Your Docs
           </h1>
           <main className={`${styles.main} space-y-2`}>
-            <FileUploadComponent setCollectionName={setCollectionName} collectionName={collectionName} />
+            <FileUploadComponent setCollectionName={setCollectionName} collectionName={collectionName} files={files} setFiles={setFiles} handleSubmitFiles={handleSubmitFiles} />
             <div className={styles.cloud}>
               <div className={styles.messagelist} ref={messageListRef}>
                 {messages.map((message, index) => {
@@ -178,11 +209,11 @@ export default function Home() {
                 </form>
               </div>
             </div>
-            {error && (
+            {(error || fileError) && (
               <div className="border border-red-400 rounded-md p-4">
-                <p className="text-red-500">{error.name}</p>
-                <p className="text-red-500">{error.message}</p>
-                <p className="text-red-500">{error.cause as ReactNode}</p>
+                <p className="text-red-500">{(error ?? fileError)?.name}</p>
+                <p className="text-red-500">{(error ?? fileError)?.message}</p>
+                <p className="text-red-500">{(error ?? fileError)?.cause as ReactNode}</p>
               </div>
             )}
           </main>
