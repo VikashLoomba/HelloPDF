@@ -80,6 +80,8 @@ The terraform folder contains scripts originally from `chromadb/examples`. To de
 % curl -v http://$instance_public_ip:8000/api/v1/heartbeat
 ```
 
+9. The API should now be able to connect with your GCP-deployed ChromaDB instance for vector store operations.
+
 ## Troubleshooting
 
 In general, keep an eye out in the `issues` and `discussions` section of this repo for solutions.
