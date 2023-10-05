@@ -7,7 +7,7 @@ import { ChromaClient } from 'chromadb';
 import { StreamingTextResponse, LangChainStream, Message } from 'ai';
 import { ConversationalRetrievalQAChain } from 'langchain/chains';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PromptTemplate } from 'langchain/prompts';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { Document } from 'langchain/document';
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   const data = await req.json();
 
   if (!data.messages.length) {
-    return Response.json({ message: 'No question in the request' }, { status: 400 });
+    return NextResponse.json({ message: 'No question in the request' }, { status: 400 });
   }
   const { stream, handlers } = LangChainStream();
 
