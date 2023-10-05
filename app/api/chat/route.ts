@@ -122,6 +122,6 @@ export async function POST(req: NextRequest) {
       }});
   } catch (error: any) {
     console.log('error', error);
-    
+    return NextResponse.json({ message: `Fatal Error: ${JSON.stringify(error)}` }, { status: 500 });
   }
 }
