@@ -17,9 +17,8 @@ import { useChat } from 'ai/react';
 export default function Home() {
   const messageListRef = useRef<HTMLDivElement>(null);
   const [sourcesForMessages, setSourcesForMessages] = useState<Record<string, any>>({});
-  const [error, setError] = useState<string | null>(null);
   const [collectionName, setCollectionName] = useState<string | null>(null);
-  const { messages, input, handleInputChange, handleSubmit, data, isLoading } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, data, isLoading, error } = useChat({
     api: '/api/chat', body: { collectionName }, headers: { 'Content-Type': 'application/json' },
     onResponse(response) {
       const sourcesHeader = response.headers.get("x-sources");
@@ -181,7 +180,7 @@ export default function Home() {
             </div>
             {error && (
               <div className="border border-red-400 rounded-md p-4">
-                <p className="text-red-500">{error}</p>
+                <p className="text-red-500">{error.message}</p>
               </div>
             )}
           </main>
