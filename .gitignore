@@ -43,3 +43,5 @@ next-env.d.ts
 
 terraform/*
 !terraform/*.tf
+
+.vscode/
