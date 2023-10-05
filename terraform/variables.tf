@@ -54,7 +54,7 @@ variable "auth_type" {
 
 resource "random_password" "chroma_password" {
   length  = 16
-  special = true
+  special = false
   lower   = true
   upper   = true
 }

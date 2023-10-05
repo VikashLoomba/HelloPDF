@@ -20,6 +20,7 @@ export async function POST(
         const newFilename = formData.get('collectionName')?.toString() ?? `${files[0].size}_${files[0].lastModified}`;
         const docs = await loadDocumentsFromPDF(files);
         // generate embeddings from docs
+        console.debug('Generating embeddings');
         const generatedEmbeddings = await generateEmbeddings(docs, newFilename ?? 'defaultCollection');
         //Ask a question using chat history
         const response = generatedEmbeddings.collectionName
