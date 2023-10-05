@@ -15,10 +15,11 @@
     "ingest": "tsx -r dotenv/config scripts/ingest-data.ts"
   },
   "dependencies": {
+    "@esbuild/darwin-arm64": "0.19.4",
     "@microsoft/fetch-event-source": "^2.0.1",
     "@pinecone-database/pinecone": "0.0.14",
     "@radix-ui/react-accordion": "^1.1.1",
-    "@esbuild/darwin-arm64": "0.19.4",
+    "ai": "^2.2.14",
     "browser-fs-access": "^0.35.0",
     "chromadb": "^1.5.11",
     "clsx": "^1.2.1",
@@ -27,6 +28,7 @@
     "langchain": "0.0.157",
     "lucide-react": "^0.125.0",
     "next": "13.2.3",
+    "openai": "^4.11.1",
     "pdf-parse": "1.1.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",

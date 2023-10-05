@@ -13,109 +13,36 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import FileUploadComponent from './components/FileUploadComponent';
+import { useChat } from 'ai/react';
 
 export default function Home() {
-  const [query, setQuery] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [messageState, setMessageState] = useState<{
-    messages: Message[];
-    pending?: string;
-    history: [string, string][];
-    pendingSourceDocs?: Document[];
-  }>({
-    messages: [
-      {
-        message: 'Hi, what would you like to learn about this document?',
-        type: 'apiMessage',
-      },
-    ],
-    history: [],
-  });
-  const [collectionName, setCollectionName] = useState<string | null>(null);
-
-  const { messages, history } = messageState;
-
   const messageListRef = useRef<HTMLDivElement>(null);
+  const [sourcesForMessages, setSourcesForMessages] = useState<Record<string, any>>({});
+  // const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [collectionName, setCollectionName] = useState<string | null>(null);
+  const { messages, input, handleInputChange, handleSubmit, data, isLoading } = useChat({
+    api: '/api/chat', body: { collectionName }, headers: { 'Content-Type': 'application/json' },
+    onResponse(response) {
+      const sourcesHeader = response.headers.get("x-sources");
+      const sources = sourcesHeader ? JSON.parse(atob(sourcesHeader)) : [];
+      const messageIndexHeader = response.headers.get("x-message-index");
+      if (sources.length && messageIndexHeader !== null) {
+        setSourcesForMessages({ ...sourcesForMessages, [messageIndexHeader]: sources });
+      }
+    },
+  })
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     textAreaRef.current?.focus();
   }, []);
 
-  //handle form submission
-  async function handleSubmit(e: any) {
-    e.preventDefault();
+  useEffect(() => console.log('data: ', data), [data])
 
-    setError(null);
-
-    if (!query) {
-      alert('Please input a question');
-      return;
-    }
-
-    const question = query.trim();
-
-    setLoading(true);
-    setQuery('');
-    const userQuestion: Message = { type: 'userMessage', message: question };
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          question,
-          history,
-          collectionName
-        }),
-      });
-      const stream = response.body;
-      const reader = stream?.getReader();
-      
-      
-      let newMessageString = '';
-      try {
-        while (true && reader) {
-          const { done, value } = await reader.read();
-          if (done) {
-            console.log('final value: ', new TextDecoder().decode(value))
-            break;
-          }
-          const data = new TextDecoder().decode(value);
-          newMessageString += data
-
-          const newMessage: Message = { type: 'apiMessage', message: newMessageString }
-          const newMessageList = [...messages, {...userQuestion}, newMessage];
-          
-          setMessageState((state) => ({
-            ...state, messages: [...newMessageList]
-          }));
-
-          //scroll to bottom
-          if(messageListRef.current) {
-            messageListRef.current.scrollTop = messageListRef.current.scrollHeight
-          }
-        }
-      } catch (error) {
-        console.error(error);
-      } finally {
-        reader?.releaseLock();
-        setMessageState((state) => ({ ...state, history: [...history, [question, newMessageString]] }));
-
-      }
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      setError('An error occurred while fetching the data. Please try again.' + error);
-      console.log('error', error);
-    }
-  }
-
-  //prevent empty submissions
   const handleEnter = (e: any) => {
-    if (e.key === 'Enter' && query) {
+    if (e.key === 'Enter' && input) {
+      console.log('Submitting Input: ', input);
       handleSubmit(e);
     } else if (e.key == 'Enter') {
       e.preventDefault();
@@ -136,7 +63,7 @@ export default function Home() {
                 {messages.map((message, index) => {
                   let icon;
                   let className;
-                  if (message.type === 'apiMessage') {
+                  if (message.role === 'assistant') {
                     icon = (
                       <Image
                         key={`${index}-api`}
@@ -163,7 +90,7 @@ export default function Home() {
                     );
                     // The latest message sent by the user will be animated while waiting for a response
                     className =
-                      loading && index === messages.length - 1
+                      isLoading && index === messages.length - 1
                         ? styles.usermessagewaiting
                         : styles.usermessage;
                   }
@@ -173,11 +100,11 @@ export default function Home() {
                         {icon}
                         <div className={styles.markdownanswer}>
                           <ReactMarkdown linkTarget="_blank">
-                            {message.message}
+                            {message.content}
                           </ReactMarkdown>
                         </div>
                       </div>
-                      {message.sourceDocs && (
+                      {!isLoading && sourcesForMessages[index + 1] && (
                         <div
                           className="p-5"
                           key={`sourceDocsAccordion-${index}`}
@@ -187,7 +114,7 @@ export default function Home() {
                             collapsible
                             className="flex-col"
                           >
-                            {message.sourceDocs.map((doc, index) => (
+                            {sourcesForMessages[index + 1].map((doc: Document, index: number) => (
                               <div key={`messageSourceDocs-${index}`}>
                                 <AccordionItem value={`item-${index}`}>
                                   <AccordionTrigger>
@@ -216,7 +143,7 @@ export default function Home() {
               <div className={styles.cloudform}>
                 <form onSubmit={handleSubmit}>
                   <textarea
-                    disabled={loading}
+                    disabled={isLoading}
                     onKeyDown={handleEnter}
                     ref={textAreaRef}
                     autoFocus={false}
@@ -225,20 +152,20 @@ export default function Home() {
                     id="userInput"
                     name="userInput"
                     placeholder={
-                      loading
+                      isLoading
                         ? 'Waiting for response...'
-                        : 'What is this legal case about?'
+                        : 'What is this document about?'
                     }
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
+                    value={input}
+                    onChange={handleInputChange}
                     className={styles.textarea}
                   />
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={isLoading}
                     className={styles.generatebutton}
                   >
-                    {loading ? (
+                    {isLoading ? (
                       <div className={styles.loadingwheel}>
                         <LoadingDots color="#000" />
                       </div>

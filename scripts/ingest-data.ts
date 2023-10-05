@@ -4,7 +4,6 @@ import { PDFLoader } from 'langchain/document_loaders/fs/pdf'
 import { Chroma } from 'langchain/vectorstores/chroma';
 import { ChromaClient, } from 'chromadb';
 import type { Document } from 'langchain/document';
-import formidable from 'formidable';
 
 export const generateEmbeddings = async (docs: Document<Record<string, any>>[], filename: string) => {
   try {
@@ -23,13 +22,12 @@ export const generateEmbeddings = async (docs: Document<Record<string, any>>[], 
   }
 }
 
-type WithFile = Required<formidable.File>
-export const loadDocumentsFromPDF = async (files: formidable.Files) => {
+export const loadDocumentsFromPDF = async (files: File[]) => {
   try {
     console.log('Files passed to loadDocuments: ', files);
     /*load raw docs from the all files in the directory */
     const rawDocs: Document[] = []
-    const pdfLoaders = files.files?.filter((fileArray): fileArray is WithFile => !!fileArray).map((file) => new PDFLoader(file.filepath)) ?? [];
+    const pdfLoaders = files?.filter((fileArray) => !!fileArray).map((file) => new PDFLoader(file)) ?? [];
     for await (const loader of pdfLoaders) {
       const doc = await loader.load();
       rawDocs.push(...doc);

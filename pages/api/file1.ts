@@ -18,6 +18,7 @@ export async function handler(
     
     try {
         const newFilename = files.files?.[0]?.newFilename;
+        //@ts-ignore
         const docs = await loadDocumentsFromPDF(files);
         // generate embeddings from docs
         const generatedEmbeddings = await generateEmbeddings(docs, newFilename ?? 'defaultCollection');
