@@ -39,7 +39,7 @@ function FileUploadComponent(props: { setCollectionName: (collectionName: string
     setIsDragging(false);
 
     const droppedFiles = event.dataTransfer.files;
-    if (droppedFiles.length > 0) {
+    if (droppedFiles?.length > 0) {
       // Handle the dropped files here
       console.log(droppedFiles);
       props.setFiles([...droppedFiles, ...props.files])
@@ -71,13 +71,13 @@ function FileUploadComponent(props: { setCollectionName: (collectionName: string
           </>
       </label>
       <>
-      {props.files.length > 0 && <ul>
+      {props.files?.length > 0 && <ul>
             {props.files.map((file, index) => (
               <li key={index} className="text-sm py-1">{file.name}</li>
             ))}
           </ul>}
       </>
-      {props.files.length > 0 && (
+      {props.files?.length > 0 && (
         <><button
           type='button'
           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 active:bg-blue-700 focus:outline-none"
