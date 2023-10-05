@@ -26,7 +26,6 @@ export const loadDocumentsFromPDF = async (files: File[]) => {
     try {
         console.log('Files passed to loadDocuments: ', files);
         const filteredFiles = files?.filter((file) => !!file);
-        console.log('Example filtered file: ', await filteredFiles[0].text())
         const rawDocs = await Promise.all(filteredFiles.map(async (file) => {
             const doc = new PDFLoader(file, { splitPages: false });
             const loadedDocs = await doc.load();
