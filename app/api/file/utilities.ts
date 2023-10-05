@@ -9,9 +9,9 @@ export const generateEmbeddings = async (docs: Document<Record<string, any>>[], 
     try {
         /*create and store the embeddings in the vectorStore*/
         const embeddings = new OpenAIEmbeddings();
-        const client = new ChromaClient({ path: `http://${btoa(process.env.CHROMA_AUTH_BASIC ?? '')}:${process.env.CHROMA_URL}`, auth: { provider: 'token', credentials: process.env.CHROMA_AUTH_TOKEN } });
+        const client = new ChromaClient({ path: `http://${process.env.CHROMA_URL}`, auth: { provider: 'token', credentials: process.env.CHROMA_AUTH_TOKEN } });
         const generatedEmbeddings = await Chroma.fromDocuments(docs, embeddings, {
-            url: `http://${process.env.CHROMA_URL}`,
+            url: `http://${btoa(process.env.CHROMA_AUTH_BASIC ?? '')}:${process.env.CHROMA_URL}`,
             collectionName: filename,
             index: client,
         });
