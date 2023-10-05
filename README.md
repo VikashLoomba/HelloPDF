@@ -1,14 +1,8 @@
-# GPT-4, LangChain & Chroma - Create a ChatGPT Chatbot for Your PDF Files
+# HelloPDF - Deployable GPT-4 Powered PDF Chat
 
-Use the new GPT-4 api to build a chatGPT chatbot for multiple Large PDF files.
+Run and deploy a GPT-4 powered chatbot in minutes!
 
-Tech stack used includes LangChain, Chroma, Typescript, Openai, and Next.js. LangChain is a framework that makes it easier to build scalable AI/LLM apps and chatbots. Chroma is a vectorstore for storing embeddings and your PDF in text to later retrieve similar docs.
-
-The visual guide of this repo and tutorial is in the `visual guide` folder.
-
-**If you run into errors, please review the troubleshooting section further down this page.**
-
-Prelude: Please make sure you have already downloaded node on your system and the version is 18 or greater.
+Utilizes ChromaDB for its vectorstore, with a Next.js frontend.
 
 ## Development
 
@@ -39,7 +33,10 @@ After installation, you should now see a `node_modules` folder.
 
 ```
 OPENAI_API_KEY=
-COLLECTION_NAME=
+CHROMA_AUTH_BASIC=
+CHROMA_AUTH_TOKEN=
+CHROMA_URL=
+COLLECTION_NAME=[optional]
 
 ```
 
@@ -47,25 +44,41 @@ COLLECTION_NAME=
 - Choose a collection name where you'd like to store your embeddings in Chroma. This collection will later be used for queries and retrieval.
 - [Chroma details](https://docs.trychroma.com/getting-started)
 
-5. In `utils/makechain.ts` chain change the `QA_PROMPT` for your own usecase. Change `modelName` in `new OpenAI` to `gpt-4`, if you have access to `gpt-4` api. Please verify outside this repo that you have access to `gpt-4` api, otherwise the application will not work.
+5. Depending on your setup, you may need to modify `app/api/files/utilities.ts` to connect to the right ChromaDB instance.
 
 6. In a new terminal window, run Chroma in the Docker container:
 
 ```
-docker run -p 8000:8000 ghcr.io/chroma-core/chroma:0.3.21
+docker run -p 8000:8000 ghcr.io/chroma-core/chroma:latest
 ```
-
-## Convert your PDF files to embeddings
-
-**This repo can load multiple PDF files**
-
-1. Inside `docs` folder, add your pdf files or folders that contain pdf files.
-
-2. Run the script `npm run ingest` to 'ingest' and embed your docs. If you run into errors troubleshoot below.
 
 ## Run the app
 
-Once you've verified that the embeddings and content have been successfully added to Chroma db, you can run the app `npm run dev` to launch the local dev environment, and then type a question in the chat interface.
+You can run the app with `npm run dev` to launch the local dev environment, and then upload one or many PDF files to chat with. After uploading, you'll be able to chat with the model.
+
+## ChromaDB Deployment
+
+The terraform folder contains scripts originally from `chromadb/examples`. To deploy your ChromaDB to GCP, do as follows:
+
+1. Install GCP CLI, log in via CLI, and create a new project. Note the project ID.
+
+2. Install terraform CLI.
+
+3. Update `terraform/exportapply.sh` with your project ID variable.
+
+4. (Optional) Generate a keypair if you want to be able to SSH in to the GCP instance.
+
+5. Run `exportapply.sh` in your terminal. 
+
+6. Run `terraform output instance_public_ip`. Take note of the output IP, and update your `.env`.
+
+7. Run `terraform output chroma_auth_token`. Take note of your auth token, and update your `.env`.
+
+8. (optional) It takes some time for the GCP instance to come up, so you can check on the status with 
+```
+% export instance_public_ip=$(terraform output instance_public_ip | sed 's/"//g')
+% curl -v http://$instance_public_ip:8000/api/v1/heartbeat
+```
 
 ## Troubleshooting
 
@@ -81,3 +94,6 @@ In general, keep an eye out in the `issues` and `discussions` section of this re
 - Make sure you have enough OpenAI credits and a valid card on your billings account.
 - Check that you don't have multiple OPENAPI keys in your global environment. If you do, the local `env` file from the project will be overwritten by systems `env` variable.
 - Try to hard code your API keys into the `process.env` variables if there are still issues.
+
+## Credits
+Originally forked from https://github.com/mayooear/gpt4-pdf-chatbot-langchain/tree/feat/chroma
