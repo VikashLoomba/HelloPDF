@@ -1,6 +1,6 @@
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { AIMessage, HumanMessage, SystemMessage } from 'langchain/schema';
-import { CONDENSE_TEMPLATE, QA_TEMPLATE } from '@/utils/makechain';
+import { CONDENSE_TEMPLATE, QA_TEMPLATE } from './utilities';
 import { COLLECTION_NAME } from '@/config/chroma';
 import { Chroma } from 'langchain/vectorstores/chroma';
 import { ChromaClient } from 'chromadb';
