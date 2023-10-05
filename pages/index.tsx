@@ -17,7 +17,6 @@ import { useChat } from 'ai/react';
 export default function Home() {
   const messageListRef = useRef<HTMLDivElement>(null);
   const [sourcesForMessages, setSourcesForMessages] = useState<Record<string, any>>({});
-  // const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [collectionName, setCollectionName] = useState<string | null>(null);
   const { messages, input, handleInputChange, handleSubmit, data, isLoading } = useChat({
@@ -148,8 +147,6 @@ export default function Home() {
                     autoFocus={false}
                     rows={1}
                     maxLength={512}
-                    id="userInput"
-                    name="userInput"
                     placeholder={
                       isLoading
                         ? 'Waiting for response...'
@@ -190,9 +187,9 @@ export default function Home() {
           </main>
         </div>
         <footer className="m-auto p-4">
-          <a href="https://twitter.com/mayowaoshin">
-            Powered by LangChainAI and Chroma. Demo built by Mayo (Twitter:
-            @mayowaoshin).
+          <a href="https://twitter.com/vikashloomba">
+            Powered by LangChainAI and Chroma. Demo built by Vikash Loomba (Twitter:
+            @vikashloomba).
           </a>
         </footer>
       </Layout>
