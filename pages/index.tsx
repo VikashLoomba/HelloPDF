@@ -70,6 +70,7 @@ export default function Home() {
       setFileError(null);
       setLoading(false);
     } catch (error) {
+      console.log(error);
       console.error('Error submitting files:', error);
       setFileError(error as Error);
     } finally {
@@ -85,7 +86,7 @@ export default function Home() {
             Chat With Your Docs
           </h1>
           <main className={`${styles.main} space-y-2`}>
-            <FileUploadComponent setCollectionName={setCollectionName} collectionName={collectionName} files={files} setFiles={setFiles} handleSubmitFiles={handleSubmitFiles} />
+            <FileUploadComponent setCollectionName={setCollectionName} collectionName={collectionName} files={files} setFiles={setFiles} handleSubmitFiles={handleSubmitFiles} loading={loading} />
             <div className={styles.cloud}>
               <div className={styles.messagelist} ref={messageListRef}>
                 {messages.map((message, index) => {

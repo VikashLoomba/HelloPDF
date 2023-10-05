@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { fileOpen } from 'browser-fs-access';
 import type { FileWithHandle } from 'browser-fs-access'
 
-function FileUploadComponent(props: { setCollectionName: (collectionName: string | null) => void, collectionName: string | null, files: FileWithHandle[], setFiles: (files: FileWithHandle[]) => void, handleSubmitFiles: () => void }) {
+function FileUploadComponent(props: { setCollectionName: (collectionName: string | null) => void, collectionName: string | null, files: FileWithHandle[], setFiles: (files: FileWithHandle[]) => void, handleSubmitFiles: () => void, loading?: boolean }) {
   const [isDragging, setIsDragging] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
 
