@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, ReactNode } from 'react';
 import Layout from '@/components/layout';
 import styles from '@/styles/Home.module.css';
 import Image from 'next/image';
@@ -180,7 +180,9 @@ export default function Home() {
             </div>
             {error && (
               <div className="border border-red-400 rounded-md p-4">
+                <p className="text-red-500">{error.name}</p>
                 <p className="text-red-500">{error.message}</p>
+                <p className="text-red-500">{error.cause as ReactNode}</p>
               </div>
             )}
           </main>
