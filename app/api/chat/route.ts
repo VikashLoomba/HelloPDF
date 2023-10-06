@@ -4,21 +4,24 @@ import { CONDENSE_TEMPLATE, QA_TEMPLATE } from './utilities';
 import { COLLECTION_NAME } from '@/config/chroma';
 import { Chroma } from 'langchain/vectorstores/chroma';
 import { ChromaClient } from 'chromadb';
-import { StreamingTextResponse, LangChainStream, Message } from 'ai';
+import { StreamingTextResponse, LangChainStream, Message, streamToResponse } from 'ai';
 import { ConversationalRetrievalQAChain } from 'langchain/chains';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { NextRequest, NextResponse } from 'next/server';
 import { PromptTemplate } from 'langchain/prompts';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { Document } from 'langchain/document';
+import { pipeBodyStreamToResponse } from 'edge-runtime';
+import { ServerResponse } from 'http';
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest, res: ServerResponse) {
+  console.log('look for res: ', res);
   const data = await req.json();
 
   if (!data.messages.length) {
     return NextResponse.json({ message: 'No question in the request' }, { status: 400 });
   }
-  const { stream, handlers } = LangChainStream();
+  const { stream, handlers, writer } = LangChainStream();
 
 
   try {
@@ -115,6 +118,13 @@ export async function POST(req: NextRequest) {
         }),
       ),
     ).toString("base64");
+    
+    // streamToResponse(stream, res, {
+    //   headers: {
+    //     "x-message-index": (messages.length + 1).toString(),
+    //     "x-sources": serializedSources,
+    //   }
+    // });
     return new StreamingTextResponse(stream, {
       headers: {
         "x-message-index": (messages.length + 1).toString(),

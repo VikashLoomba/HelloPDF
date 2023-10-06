@@ -26,6 +26,7 @@ export default function Home() {
   const { messages, input, handleInputChange, handleSubmit, data, isLoading, error, } = useChat({
     api: '/api/chat', body: { collectionName }, headers: { 'Content-Type': 'application/json' },
     onResponse(response) {
+      console.log("Response: ", response)
       const sourcesHeader = response.headers.get("x-sources");
       const sources = sourcesHeader ? JSON.parse(atob(sourcesHeader)) : [];
       const messageIndexHeader = response.headers.get("x-message-index");
@@ -35,6 +36,8 @@ export default function Home() {
     },
   })
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => messageListRef.current?.scrollIntoView({behavior: 'smooth'}), [isLoading, messageListRef, messages])
 
   useEffect(() => {
     textAreaRef.current?.focus();
@@ -88,7 +91,7 @@ export default function Home() {
           <main className={`${styles.main} space-y-2`}>
             <FileUploadComponent setCollectionName={setCollectionName} collectionName={collectionName} files={files} setFiles={setFiles} handleSubmitFiles={handleSubmitFiles} loading={loading} />
             <div className={styles.cloud}>
-              <div className={styles.messagelist} ref={messageListRef}>
+              <div className={styles.messagelist}>
                 {messages.map((message, index) => {
                   let icon;
                   let className;
@@ -127,13 +130,13 @@ export default function Home() {
                     <>
                       <div key={`chatMessage-${index}`} className={className}>
                         {icon}
-                        <div className={styles.markdownanswer}>
+                        <div className={styles.markdownanswer} ref={messageListRef}>
                           <ReactMarkdown linkTarget="_blank">
                             {message.content}
                           </ReactMarkdown>
                         </div>
                       </div>
-                      {!isLoading && sourcesForMessages[index + 1] && (
+                      {sourcesForMessages[index + 1] && (
                         <div
                           className="p-5"
                           key={`sourceDocsAccordion-${index}`}
@@ -144,7 +147,7 @@ export default function Home() {
                             className="flex-col"
                           >
                             {sourcesForMessages[index + 1].map((doc: Document, index: number) => (
-                              <div key={`messageSourceDocs-${index}`}>
+                              <div key={`messageSourceDocs-${index}`} >
                                 <AccordionItem value={`item-${index}`}>
                                   <AccordionTrigger>
                                     <h3>Source {index + 1}</h3>

@@ -23,6 +23,7 @@
     "chromadb": "^1.5.11",
     "clsx": "^1.2.1",
     "dotenv": "^16.0.3",
+    "edge-runtime": "^2.5.4",
     "formidable": "^3.5.1",
     "langchain": "0.0.157",
     "lucide-react": "^0.125.0",
